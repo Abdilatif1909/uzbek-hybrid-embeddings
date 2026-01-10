@@ -1,0 +1,3 @@
+Model,Vocabulary Size,OOV Coverage,Avg Cosine Similarity
+Word2Vec,6,0.0,0.0
+FastText,6,1.0,-0.005391411948949099

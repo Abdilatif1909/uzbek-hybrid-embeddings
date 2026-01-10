@@ -1,0 +1,13 @@
+numpy
+pandas
+scikit-learn
+gensim
+fasttext
+torch
+transformers
+datasets
+sentencepiece
+matplotlib
+seaborn
+tqdm
+sentencepiece

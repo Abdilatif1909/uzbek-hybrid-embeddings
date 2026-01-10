@@ -1,0 +1,10 @@
+Suniy intellekt zamonaviy texnologiyalarning asosiy yo‘nalishlaridan biridir.
+Mashinali o‘qitish ma’lumotlar asosida model yaratishga imkon beradi.
+O‘zbek tili tabiiy tilni qayta ishlash uchun murakkab hisoblanadi.
+So‘zlarning morfologik tuzilishi muhim ahamiyatga ega.
+FastText subword yondashuvi orqali yaxshi natija beradi.
+Word2Vec semantik o‘xshashlikni aniqlashda ishlatiladi.
+BERT modeli kontekstual embeddinglarni yaratadi.
+Matnlarni tozalash model sifati uchun muhim.
+Katta korpuslar chuqur o‘rganish samaradorligini oshiradi.
+Ilmiy tadqiqotlarda ochiq manbalar muhim hisoblanadi.
