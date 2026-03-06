@@ -1,0 +1,4 @@
+Model,Vocabulary Size,OOV Coverage,Avg Cosine (related),Avg Cosine (unrelated),Median Cosine,Std Cosine,Downstream Accuracy,Downstream F1,pairs_used_related,pairs_used_unrelated,pairs_used_morphological
+Word2Vec,1760.0,1.0,0.997,0.999,0.998,0.002,0.358,0.2,7,6,2
+FastText,1760.0,1.0,0.981,1.0,1.0,0.109,0.338,0.201,7,6,2
+mBERT,,,0.822,,0.822,0.038,0.915,0.852,7,6,2

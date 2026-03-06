@@ -1,0 +1,4 @@
+Model,Vocabulary Size,OOV random100_known,OOV random100_total,OOV synthetic50_known,OOV synthetic50_total,n_pairs_related,mean_related,median_related,std_related,n_pairs_unrelated,mean_unrelated,median_unrelated,std_unrelated,overall_mean,overall_median,overall_std
+Word2Vec,1760,100,100,0,0,4,0.997,0.998,0.002,1,0.999,0.999,0.0,0.997,0.998,0.002
+FastText,1760,100,100,0,0,60,0.981,1.0,0.14,40,1.0,1.0,0.0,0.989,1.0,0.109
+mBERT,,,100,,0,,0.822,0.822,0.038,,,,,0.822,0.822,0.038

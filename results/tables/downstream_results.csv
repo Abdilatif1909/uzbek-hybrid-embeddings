@@ -1,0 +1,4 @@
+model,accuracy,f1_macro
+Word2Vec,0.32,0.184
+FastText,0.338,0.201
+mBERT,0.915,0.852

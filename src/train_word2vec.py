@@ -1,40 +1,56 @@
+import yaml
 from gensim.models import Word2Vec
 from pathlib import Path
+from typing import List
 
-CORPUS_PATH = "data/processed/corpus.txt"
-MODEL_DIR = Path("models/word2vec")
+CONFIG_PATH = Path("config.yaml")
+CORPUS_PATH = Path("data/processed/corpus.txt")
+MODEL_DIR = Path("models")
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
+MODEL_PATH = MODEL_DIR / "word2vec.model"
 
-def load_corpus(path):
-    with open(path, encoding="utf-8") as f:
+
+def load_config(path: Path):
+    with path.open(encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+def load_corpus(path: Path) -> List[List[str]]:
+    with path.open(encoding="utf-8") as f:
         sentences = [line.strip().split() for line in f if line.strip()]
     return sentences
 
-def train_word2vec(sentences):
+
+def train_word2vec(sentences: List[List[str]], config: dict):
     model = Word2Vec(
         sentences=sentences,
-        vector_size=100,
-        window=5,
-        min_count=2,
-        workers=4,
-        sg=1,          # 1 = Skip-gram, 0 = CBOW
-        epochs=20
+        vector_size=config.get("vector_size", 300),
+        window=config.get("window", 5),
+        min_count=config.get("min_count", 3),
+        workers=config.get("workers", 4),
+        sg=config.get("sg", 1),
+        epochs=config.get("epochs", 10),
+        seed=config.get("seed", 42)
     )
     return model
 
+
 if __name__ == "__main__":
+    config = load_config(CONFIG_PATH) if CONFIG_PATH.exists() else {}
+
+    if not CORPUS_PATH.exists():
+        raise FileNotFoundError(f"Processed corpus not found: {CORPUS_PATH}. Run src/preprocessing.py first.")
+
     sentences = load_corpus(CORPUS_PATH)
-    print(f"Loaded {len(sentences)} sentences")
+    print(f"Loaded {len(sentences)} sentences from {CORPUS_PATH}")
 
-    model = train_word2vec(sentences)
+    model = train_word2vec(sentences, config)
 
-    model_path = MODEL_DIR / "word2vec.model"
-    model.save(str(model_path))
+    model.save(str(MODEL_PATH))
 
-    print(f"Word2Vec model saved to {model_path}")
+    vocab_size = len(model.wv)
+    # save vocab size metadata
+    (MODEL_DIR / "word2vec_vocab_size.txt").write_text(str(vocab_size), encoding="utf-8")
 
-    # test
-    if "suniy" in model.wv:
-        print("Most similar to 'suniy':")
-        for word, score in model.wv.most_similar("suniy"):
-            print(word, score)
+    print(f"Word2Vec model saved to {MODEL_PATH}")
+    print(f"Vocabulary size: {vocab_size}")

@@ -1,5 +1,6 @@
 import re
 from pathlib import Path
+from typing import List
 
 
 def clean_text(text: str) -> str:
@@ -7,57 +8,72 @@ def clean_text(text: str) -> str:
     Clean and normalize Uzbek text.
     - Lowercase
     - Remove URLs
-    - Keep Uzbek Cyrillic + Latin characters
+    - Keep Uzbek Cyrillic + Latin characters and common punctuation used for sentence splitting
     - Remove extra spaces
     """
     text = text.lower()
     text = re.sub(r"http\S+", "", text)
-    text = re.sub(r"[^a-zA-Zа-яА-ЯёЁўқғҳʼ’ ]", " ", text)
+    # allow Latin, Cyrillic, Uzbek specific letters and basic punctuation for splitting
+    text = re.sub(r"[^a-zA-Zа-яА-ЯёЁўқғҳғӣӣʼ’\-\.,!\?\:\;\(\)\\n ]", " ", text)
     text = re.sub(r"\s+", " ", text).strip()
     return text
 
 
-def preprocess_file(input_path: str, output_path: str):
+def split_sentences(text: str) -> List[str]:
     """
-    Read raw text file, clean each line, and save processed corpus.
-    Each line is treated as a single sentence.
+    Split text into sentences using punctuation heuristics.
+    This is a lightweight splitter suitable for Uzbek corpora (no external dependencies).
     """
-    input_path = Path(input_path)
-    output_path = Path(output_path)
+    # Normalize ellipsis
+    text = text.replace('…', '...')
+    # Split on sentence enders followed by space or linebreak
+    parts = re.split(r'(?<=[\.!?])\s+', text)
+    sentences = [p.strip() for p in parts if p and len(p.split()) >= 3]
+    return sentences
 
-    if not input_path.exists():
-        raise FileNotFoundError(f"Input file not found: {input_path}")
 
-    with input_path.open(encoding="utf-8") as f:
-        lines = f.readlines()
+def preprocess_all_raw(raw_dir: str = "data/raw", out_path: str = "data/processed/corpus.txt", out_big: str = "data/processed/corpus_big.txt", sample_limit: int = None):
+    raw_dir = Path(raw_dir)
+    out_path = Path(out_path)
+    out_big = Path(out_big)
 
-    cleaned_lines = []
-    for line in lines:
-        line = line.strip()
-        if not line:
-            continue
-        cleaned = clean_text(line)
-        if len(cleaned.split()) >= 3:   # juda qisqa gaplarni tashlaymiz
-            cleaned_lines.append(cleaned)
+    if not raw_dir.exists():
+        raise FileNotFoundError(f"Raw data directory not found: {raw_dir}")
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    with output_path.open("w", encoding="utf-8") as f:
-        for line in cleaned_lines:
-            f.write(line + "\n")
+    texts = []
+    for p in sorted(raw_dir.glob("*.txt")):
+        with p.open(encoding="utf-8") as f:
+            content = f.read()
+            if not content:
+                continue
+            content = clean_text(content)
+            sents = split_sentences(content)
+            texts.extend(sents)
 
-    print(f"Processed {len(cleaned_lines)} lines")
-    print(f"Saved to: {output_path}")
+    if sample_limit:
+        sampled = texts[:sample_limit]
+    else:
+        sampled = texts
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with out_path.open("w", encoding="utf-8") as f:
+        for s in sampled:
+            f.write(s + "\n")
+
+    # save full corpus as well
+    with out_big.open("w", encoding="utf-8") as f:
+        for s in texts:
+            f.write(s + "\n")
+
+    print(f"Processed sentences (saved sample): {len(sampled)} -> {out_path}")
+    print(f"Processed sentences (full): {len(texts)} -> {out_big}")
 
 
 if __name__ == "__main__":
-    # 🔴 ASOSIY KORPUS (katta)
-    preprocess_file(
-        input_path="data/raw/texts_big.txt",
-        output_path="data/processed/corpus_big.txt"
+    # default behavior: process all raw files and create a full and a sample corpus
+    preprocess_all_raw(
+        raw_dir="data/raw",
+        out_path="data/processed/corpus.txt",
+        out_big="data/processed/corpus_big.txt",
+        sample_limit=None
     )
-
-    # 🟡 AGAR KICHIK TEST KORPUS KERAK BO‘LSA (ixtiyoriy)
-    # preprocess_file(
-    #     input_path="data/raw/texts.txt",
-    #     output_path="data/processed/corpus.txt"
-    # )
